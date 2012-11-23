@@ -2,7 +2,9 @@
 # Sanity check the users setup for common misconfigurations
 #
 
-SANITY_REQUIRED_UTILITIES ?= "patch diffstat makeinfo git bzip2 tar gzip gawk chrpath wget cpio"
+SANITY_REQUIRED_UTILITIES ?= "patch diffstat makeinfo git bzip2 tar gzip gawk wget cpio"
+SANITY_REQUIRED_UTILITIES_Linux ?= "${SANITY_REQUIRED_UTILITIES} chrpath"
+SANITY_REQUIRED_UTILITIES_Darwin ?= "${SANITY_REQUIRED_UTILITIES} install_name_tool"
 
 python check_bblayers_conf() {
     bblayers_fn = os.path.join(d.getVar('TOPDIR', True), 'conf/bblayers.conf')
@@ -336,6 +338,10 @@ def check_sanity_validmachine(sanity_data):
 
     return messages
 
+def get_required_utilities(sanity_data):
+    import platform
+    sanity_var = 'SANITY_REQUIRED_UTILITIES_%s' %platform.system()
+    return sanity_data.getVar(sanity_var, True)
 
 def check_sanity(sanity_data):
     import subprocess
@@ -440,7 +446,7 @@ def check_sanity(sanity_data):
     if not check_app_exists('${BUILD_PREFIX}g++', sanity_data):
         missing = missing + "C++ Compiler (%sg++)," % sanity_data.getVar("BUILD_PREFIX", True)
 
-    required_utilities = sanity_data.getVar('SANITY_REQUIRED_UTILITIES', True)
+    required_utilities = get_required_utilities(sanity_data)
 
     if "qemu-native" in assume_provided:
         if not check_app_exists("qemu-arm", sanity_data):
