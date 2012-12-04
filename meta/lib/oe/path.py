@@ -86,14 +86,7 @@ def copytree(src, dst):
 
 def remove(path, recurse=True):
     """Equivalent to rm -f or rm -rf"""
-    for name in glob.glob(path):
-        try:
-            os.unlink(name)
-        except OSError, exc:
-            if recurse and exc.errno == errno.EISDIR:
-                shutil.rmtree(name)
-            elif exc.errno != errno.ENOENT:
-                raise
+    bb.utils.remove(path, recurse)
 
 def symlink(source, destination, force=False):
     """Create a symbolic link"""
